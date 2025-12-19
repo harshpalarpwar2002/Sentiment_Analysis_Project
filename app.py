@@ -12,12 +12,19 @@ st.set_page_config(
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
-.main-card {
-    background: linear-gradient(135deg, #EEF2FF, #FFFFFF);
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+/* Remove Streamlit top header */
+header {visibility: hidden;}
+
+/* Remove top padding space */
+.block-container {
+    padding-top: 1rem;
 }
+
+/* Optional: remove footer */
+footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
 .title {
     text-align: center;
     font-size: 40px;
