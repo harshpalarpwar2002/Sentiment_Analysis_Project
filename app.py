@@ -1,123 +1,121 @@
 import streamlit as st
 from transformers import pipeline
+import time
 
-# ---------------- Page Configuration ----------------
+# ---------------- PAGE CONFIG (MUST BE FIRST) ----------------
 st.set_page_config(
-    page_title="Sentiment Analysis | Durgesh Borse",
+    page_title="Interactive Sentiment Analyzer",
     page_icon="💬",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# ---------------- Load Model (Cached) ----------------
+# ---------------- REMOVE TOP WHITE BAR ----------------
+st.markdown(
+    """
+    <style>
+    header {visibility: hidden;}
+    .block-container {
+        padding-top: 1rem;
+    }
+    footer {visibility: hidden;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ---------------- LOAD MODEL ----------------
 @st.cache_resource
 def load_model():
     return pipeline("sentiment-analysis")
 
 model = load_model()
 
-# ---------------- Custom CSS ----------------
+# ---------------- CUSTOM UI CSS ----------------
 st.markdown("""
 <style>
-body {
-    background-color: #f4f6f9;
+.main-card {
+    background: linear-gradient(135deg, #EEF2FF, #FFFFFF);
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 .title {
     text-align: center;
-    font-size: 42px;
-    font-weight: bold;
-    color: #1f2937;
+    font-size: 38px;
+    font-weight: 800;
+    color: #4338CA;
 }
 .subtitle {
     text-align: center;
     font-size: 18px;
-    color: #6b7280;
-    margin-bottom: 10px;
+    color: #6B7280;
+    margin-bottom: 25px;
 }
-.author {
-    text-align: center;
-    font-size: 16px;
-    color: #2563eb;
-    margin-bottom: 30px;
-}
-.result-box {
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 22px;
+.result {
+    font-size: 26px;
     font-weight: bold;
+    text-align: center;
 }
-.positive {
-    background-color: #dcfce7;
-    color: #166534;
-}
-.negative {
-    background-color: #fee2e2;
-    color: #991b1b;
+.footer {
+    text-align: center;
+    color: #9CA3AF;
+    margin-top: 30px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- Header ----------------
-st.markdown('<div class="title">💬 Sentiment Analysis App</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">NLP Application using Hugging Face Transformers</div>', unsafe_allow_html=True)
-st.markdown('<div class="author">Created by <b>Durgesh Borse</b></div>', unsafe_allow_html=True)
+# ---------------- UI ----------------
+st.markdown('<div class="title">💬 Sentiment Analyzer</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Type text and get instant emotional feedback</div>', unsafe_allow_html=True)
 
-# ---------------- Input ----------------
+st.markdown('<div class="main-card">', unsafe_allow_html=True)
+
 text = st.text_area(
-    "✍️ Enter your text below:",
-    height=120,
-    placeholder="Example: I don't like this product"
+    "✍️ Enter your text",
+    placeholder="I don't like this product...",
+    height=120
 )
 
-# ---------------- Button ----------------
-if st.button("🔍 Analyze Sentiment"):
+col1, col2 = st.columns(2)
+
+with col1:
+    analyze = st.button("🔍 Analyze")
+with col2:
+    clear = st.button("🧹 Clear")
+
+if clear:
+    st.rerun()
+
+if analyze:
     if text.strip() == "":
-        st.warning("⚠️ Please enter some text.")
+        st.warning("⚠️ Please enter text to analyze")
     else:
-        result = model(text)[0]
+        with st.spinner("Analyzing sentiment..."):
+            time.sleep(0.8)
+            result = model(text)[0]
+
         label = result["label"]
-        score = round(result["score"] * 100, 2)
+        confidence = round(result["score"] * 100, 2)
 
         st.markdown("---")
 
         if label == "POSITIVE":
             st.markdown(
-                f'<div class="result-box positive">😊 POSITIVE<br>Confidence: {score}%</div>',
+                f'<div class="result" style="color:#16A34A;">😊 Positive</div>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                f'<div class="result-box negative">😠 NEGATIVE<br>Confidence: {score}%</div>',
+                f'<div class="result" style="color:#DC2626;">😞 Negative</div>',
                 unsafe_allow_html=True
             )
 
-# ---------------- Footer ----------------
-st.markdown("""
-<hr>
-<center>
-© 2025 | Sentiment Analysis App by <b>Durgesh Borse</b>
-</center>
-""", unsafe_allow_html=True)
-    if label == "POSITIVE":
-        st.markdown(
-            f'<div class="result" style="color:#16A34A;">😊 Positive</div>',
-            unsafe_allow_html=True
-        )
         st.progress(confidence / 100)
-    else:
-        st.markdown(
-            f'<div class="result" style="color:#DC2626;">😞 Negative</div>',
-            unsafe_allow_html=True
-        )
-        st.progress(confidence / 100)
-
-    st.metric(label="Confidence Score", value=f"{confidence}%")
-
-elif analyze:
-    st.warning("⚠️ Please enter text to analyze")
+        st.metric("Confidence", f"{confidence}%")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- FOOTER ----------------
 st.markdown('<div class="footer">Built with Streamlit & 🤗 Transformers</div>', unsafe_allow_html=True)
+reamlit & 🤗 Transformers</div>', unsafe_allow_html=True)
 
