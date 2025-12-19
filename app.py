@@ -9,22 +9,38 @@ st.set_page_config(
     layout="centered"
 )
 
+# ---------------- FIX TOP WHITE BAR ----------------
+st.markdown(
+    """
+    <style>
+    /* Hide Streamlit header */
+    [data-testid="stHeader"] {
+        display: none;
+    }
+
+    /* Remove top padding */
+    .block-container {
+        padding-top: 1rem;
+    }
+
+    /* Hide footer */
+    [data-testid="stFooter"] {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
-/* Remove Streamlit top header */
-header {visibility: hidden;}
-
-/* Remove top padding space */
-.block-container {
-    padding-top: 1rem;
+.main-card {
+    background: linear-gradient(135deg, #EEF2FF, #FFFFFF);
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-
-/* Optional: remove footer */
-footer {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
-
 .title {
     text-align: center;
     font-size: 40px;
@@ -62,6 +78,50 @@ st.markdown('<div class="title">💬 Sentiment Analyzer</div>', unsafe_allow_htm
 st.markdown('<div class="subtitle">Type text and get instant emotional feedback</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="main-card">', unsafe_allow_html=True)
+
+text = st.text_area(
+    "✍️ Enter your text",
+    placeholder="I don't like this product...",
+    height=120
+)
+
+col1, col2 = st.columns(2)
+analyze = col1.button("🔍 Analyze")
+clear = col2.button("🧹 Clear")
+
+if clear:
+    st.experimental_rerun()
+
+if analyze and text.strip():
+    with st.spinner("Analyzing sentiment..."):
+        time.sleep(0.6)
+        result = model(text)[0]
+
+    label = result["label"]
+    confidence = round(result["score"] * 100, 2)
+
+    st.markdown("---")
+
+    if label == "POSITIVE":
+        st.markdown(
+            f'<div class="result" style="color:#16A34A;">😊 Positive</div>',
+            unsafe_allow_html=True
+        )
+        st.progress(confidence / 100)
+    else:
+        st.markdown(
+            f'<div class="result" style="color:#DC2626;">😞 Negative</div>',
+            unsafe_allow_html=True
+        )
+        st.progress(confidence / 100)
+
+    st.metric("Confidence", f"{confidence}%")
+
+elif analyze:
+    st.warning("⚠️ Please enter text")
+
+st.markdown('</div>', unsafe_allow_html=True)
+ain-card">', unsafe_allow_html=True)
 
 text = st.text_area(
     "✍️ Enter your text",
